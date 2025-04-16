@@ -1,0 +1,31 @@
+
+FROM nginx:latest
+
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    make \
+    libpcre3-dev \
+    libssl-dev \
+    zlib1g-dev \
+    curl \
+    git
+
+RUN git clone https://github.com/openresty/headers-more-nginx-module.git /tmp/headers-more
+
+
+RUN curl -L https://nginx.org/download/nginx-1.22.0.tar.gz -o /tmp/nginx.tar.gz && \
+    tar -xvzf /tmp/nginx.tar.gz -C /tmp && \
+    cd /tmp/nginx-1.22.0 && \
+    ./configure --with-compat --add-dynamic-module=/tmp/headers-more && \
+    make modules && \
+    make install
+
+
+COPY nginx.conf /etc/nginx/nginx.conf
+
+
+EXPOSE 80 443
+
+
+CMD ["nginx", "-g", "daemon off;"]
